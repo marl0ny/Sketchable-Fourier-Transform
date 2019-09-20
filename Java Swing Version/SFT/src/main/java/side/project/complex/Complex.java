@@ -1,4 +1,4 @@
-package main.java.side.project.complex;
+package side.project.complex;
 
 class DivisionByZeroException extends ArithmeticException {}
 
@@ -134,24 +134,108 @@ public class Complex {
         return new Complex(this.r - real, this.i - imag);
     }
 
-    public static String toString(Complex z){
+    public void divideBy(Complex z) {
+        double real = z.r;
+        double imag = z.i;
+        double abs2 = real*real + imag*imag;
+        if (abs2 == 0.0){
+            throw new DivisionByZeroException();
+        }
+        real *= (1.0/abs2);
+        imag *= (-1.0/abs2);
+        double re = this.r;
+        double im = this.i;
+        this.r = real*re - imag*im;
+        this.i = re*imag + im*real;
+    }
+
+    public void divideBy(double real) {
+        if (real == 0.0) {
+            throw new DivisionByZeroException();
+        }
+        this.r = this.r/real;
+        this.i = this.i/real;
+    }
+
+    public void divideBy(double real, double imag) {
+        double abs2 = real*real + imag*imag;
+        if (abs2 == 0.0){
+            throw new DivisionByZeroException();
+        }
+        real *= (1.0/abs2);
+        imag *= (-1.0/abs2);
+        double re = this.r;
+        double im = this.i;
+        this.r = real*re - imag*im;
+        this.i = re*imag + im*real;
+    }
+
+    public void multiplyBy(Complex z) {
+        double re =this.r;
+        double im = this.i;
+        this.r = z.r*re - z.i*im;
+        this.i = re*z.i + im*z.r;
+    }
+
+    public void multiplyBy(double real) {
+        this.r *= real;
+        this.i *= real;
+    }
+
+    public void multiplyBy(double real, double imag) {
+        double re =this.r;
+        double im = this.i;
+        this.r = real*re - imag*im;
+        this.i = re*imag + im*real;
+    }
+
+    public void addBy(Complex z) {
+        this.r += z.r;
+        this.i += z.i;
+    }
+
+    public void addBy(double real) {
+        this.r += real;
+    }
+
+    public void addBy(double real, double imag) {
+        this.r += real;
+        this.i += imag;
+    }
+
+    public void subtractBy(Complex z) {
+        this.r -= z.r;
+        this.i -= z.i;
+    }
+
+    public void subtractBy(double real) {
+        this.r -= real;
+    }
+
+    public void subtractBy(double real, double imag) {
+        this.r -= real;
+        this.i -= imag;
+    }
+
+    @Override
+    public String toString(){
         String str = "";
-        if (z.r == 0.0){
-            if (z.i == 0.0){
+        if (this.r == 0.0){
+            if (this.i == 0.0){
                 str += "0";
             }
-            else if (z.i < 0.0){
+            else if (this.i < 0.0){
                 str += "-";
             }
         }
         else{
-            str += z.r;
-            if (z.i != 0){
-                str += (z.i > 0)? " + " : " - ";
+            str += this.r;
+            if (this.i != 0){
+                str += (this.i > 0)? " + " : " - ";
             }
         }
-        if (z.i != 0.0){
-            str += (z.i > 0.0)? (z.i + "i") : ((-1.0)*z.i + "i");
+        if (this.i != 0.0){
+            str += (this.i > 0.0)? (this.i + "i") : ((-1.0)*this.i + "i");
         }
         return str;
     }

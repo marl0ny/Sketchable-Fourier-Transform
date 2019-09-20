@@ -1,20 +1,21 @@
-package main.java.side.project.gui;
+package side.project.gui;
 
-import main.java.side.project.complex.Complex;
-import main.java.side.project.complex.ComplexArray;
-import main.java.side.project.complex.Functions;
-import main.java.side.project.complex.FourierTransform;
+import side.project.complex.Complex;
+import side.project.complex.ComplexArray;
+import side.project.complex.Functions;
+import side.project.complex.FourierTransform;
+
 import java.awt.*;
 
 class ComplexCircles {
-    Complex prev;
-    Complex next;
-    double freq = 0.0;
     ComplexArray ftAmps;
     ComplexArray lineDrawn;
     ComplexArray original;
     double [] frequencies;
     int pointsPerInterval;
+    Complex prev;
+    Complex next;
+    double freq = 0.0;
     ComplexCircles(ComplexArray array) {
         pointsPerInterval = 4;
         lineDrawn = new ComplexArray();
@@ -52,13 +53,8 @@ class ComplexCircles {
     void updateOneCircle(Graphics g, int i) {
         freq = -frequencies[i] * Math.PI * 2.0 / (
                 pointsPerInterval * ftAmps.size());
-        ftAmps.set(i,
-                ftAmps.get(i).multiply(
-                        Functions.exp(0.0, freq)));
-        next = new Complex(
-                ftAmps.get(i).getReal() + prev.getReal(),
-                ftAmps.get(i).getImag() + prev.getImag()
-        );
+        ftAmps.get(i).multiplyBy(Functions.exp(0.0, freq));
+        next = ftAmps.get(i).add(prev);
         g.drawLine((int)prev.getReal(), (int)prev.getImag(),
                 (int)next.getReal(), (int)next.getImag());
         double radius = ftAmps.get(i).getAbs();

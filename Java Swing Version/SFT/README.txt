@@ -1,5 +1,13 @@
-  SKETCHABLE FOURIER TRANSFORM JAVA SWING VERSION
+#########################################################
+ SFT - Sketchable Fourier Transform - Java Swing Version
+#########################################################
 
-To run this, go to the ./src directory. Then enter the following:
-  javac ./main/java/side/project/gui/SwingFrame.java
-  java main.java.side.project.gui.SwingFrame
+Express your mouse sketches in terms of rotating complex
+exponentials! To run this, open a terminal in this
+folder and type the following:
+
+ cd ./src/main/java
+ javac ./side/project/gui/SwingFrame.java
+ java side.project.gui.SwingFrame
+
+Enjoy!

@@ -1,7 +1,7 @@
-package main.java.side.project.gui;
+package side.project.gui;
 
-import main.java.side.project.complex.Complex;
-import main.java.side.project.complex.ComplexArray;
+import side.project.complex.Complex;
+import side.project.complex.ComplexArray;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,7 +49,7 @@ class Canvas extends JPanel implements MouseListener, KeyListener {
                     (int)p1.getReal(), (int)p1.getImag());
         }
     }
-	void clear (Graphics g){
+	void clear(Graphics g){
 		//"Write once, run anywhere" is completely wrong.
 		//g.clearRect(0, 0, this.width, this.height);
 		Color color = g.getColor();
@@ -158,11 +158,11 @@ public class SwingFrame extends JFrame
             this.canvas.repaint();
         }
     }
-	
-	public static void main(String [] args){
-		SwingFrame gui = new SwingFrame();
+
+    public static void main(String [] args) {
+        SwingFrame gui = new SwingFrame();
         gui.run();
-	}
+    }
 
     @Override
     public void windowClosing(WindowEvent windowEvent) {

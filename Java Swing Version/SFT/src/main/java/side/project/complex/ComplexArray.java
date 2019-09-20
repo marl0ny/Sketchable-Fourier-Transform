@@ -1,4 +1,4 @@
-package main.java.side.project.complex;
+package side.project.complex;
 
 import java.util.ArrayList;
 
@@ -20,8 +20,7 @@ public class ComplexArray extends ArrayList<Complex> {
         }
     }
 
-    public ComplexArray(double [] reValues, double [] imValues)
-            throws UnequalArrayLengthsException{
+    public ComplexArray(double [] reValues, double [] imValues) {
         if (reValues.length != imValues.length){
             throw new UnequalArrayLengthsException();
         }
@@ -38,15 +37,16 @@ public class ComplexArray extends ArrayList<Complex> {
         return array;
     }
 
-    public static String toString(ComplexArray array) {
-        if (array.isEmpty()){
+    @Override
+    public String toString() {
+        if (this.isEmpty()){
             return "[]";
         }
         StringBuilder str = new StringBuilder("[");
-        if (array.size() < 100){
-            for (int i = 0; i < array.size(); i++){
-                str.append(Complex.toString(array.get(i)));
-                if (i < array.size() - 1){
+        if (this.size() < 100){
+            for (int i = 0; i < this.size(); i++){
+                str.append((this.get(i)).toString());
+                if (i < this.size() - 1){
                     str.append(", ");
                 }
                 else{
@@ -55,11 +55,13 @@ public class ComplexArray extends ArrayList<Complex> {
             }
         }else{
             for (int i = 0; i < 5; i++){
-                str.append(Complex.toString(array.get(i)));
+                str.append((this.get(i)).toString());
                 str.append(", ");
             }
             str.append("..., ");
-            str.append(Complex.toString(array.get(array.size() - 1))).append("]");
+            str.append(
+                    (this.get(this.size() - 1)).toString()
+            ).append("]");
         }
         return str.toString();
     }
