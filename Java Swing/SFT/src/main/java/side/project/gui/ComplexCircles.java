@@ -76,8 +76,10 @@ class ComplexCircles {
                 ftAmps.get(0).getReal(),
                 ftAmps.get(0).getImag()
         );
+		int half_n = (ftAmps.size()%2 == 1)?
+                		ftAmps.size()/2 + 1: ftAmps.size()/2;
         for (int i = 1, k =ftAmps.size() - 1;
-             i < ftAmps.size()/2; i++, k--) {
+             i < half_n; i++, k--) {
             updateOneCircle(g, i);
             updateOneCircle(g, k);
         }

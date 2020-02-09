@@ -130,11 +130,12 @@ public class FourierTransform{
 
     public static double [] fourierFrequencies(int n) {
         double [] freq = new double[n];
-        for (int i = 0; i < n/2; i++){
+		int half_n = (n % 2 == 1)? n/2 + 1: n/2;
+        for (int i = 0; i < half_n; i++){
             freq[i] = i;
         }
         int k=-1;
-        for (int j = n - 1; j >= n/2; j--){
+        for (int j = n - 1; j >= half_n; j--){
             freq[j] = k;
             k--;
         }

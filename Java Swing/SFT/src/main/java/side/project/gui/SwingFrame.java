@@ -50,8 +50,6 @@ class Canvas extends JPanel implements MouseListener, KeyListener {
         }
     }
 	void clear(Graphics g){
-		//"Write once, run anywhere" is completely wrong.
-		//g.clearRect(0, 0, this.width, this.height);
 		Color color = g.getColor();
 		g.setColor(this.getBackground());
 		g.fillRect(0, 0, this.width, this.height);
