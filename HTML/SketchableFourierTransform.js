@@ -283,6 +283,7 @@ Ani.animate = function(){
   req = requestAnimationFrame(Ani.animate);
 };
 
+document.addEventListener("ontouchmove", plotPoints);
 document.addEventListener("mousemove", plotPoints);
 
 function plotPoints(event){
