@@ -9,7 +9,6 @@ const invsqrt2 = 0.70710678118654752;
 
 class ComplexArray{
   /*Complex-valued array.
-
   length: number of elements
   real: real part
   imag: imaginary part
@@ -133,7 +132,7 @@ let euclideanDistance = (x, y) => Math.sqrt(x*x + y*y);
  */
 
 class AnimationObject{
-	
+
   constructor(){
 
     /*The tau and 1/sqrt(2) constants are not in the
@@ -241,7 +240,7 @@ Ani.animate = function(){
   Ani.ctx.stroke();
   Ani.ctx.closePath();
   //*****************************//
-  
+
   //*** Draw the fourier circles ***//
   Ani.ctx.beginPath();
   Ani.ctx.strokeStyle = 'rgba(255, 204, 102, 1)'; //Orange
@@ -283,102 +282,123 @@ Ani.animate = function(){
   req = requestAnimationFrame(Ani.animate);
 };
 
-document.addEventListener("ontouchmove", plotPoints);
-document.addEventListener("mousemove", plotPoints);
+document.addEventListener("touchstart", touchPlotPointsOnMove);
+document.addEventListener("touchmove", touchPlotPointsOnMove);
+document.addEventListener("touchend", ev => plotPointsOnRelease());
+document.addEventListener("mousemove", mousePlotPoints);
 
-function plotPoints(event){
-  /*This function deals with plotting points in the canvas*/
 
-  //Get button positions
+/*
+This function deals with plotting points in the canvas
+*/
+function mousePlotPoints(event){
+
+  // Get button positions
   if (event.buttons !== 0){
     x = event.clientX - Ani.canvas.offsetLeft;
     y = event.clientY - Ani.canvas.offsetTop;
+    plotPointsOnMove(x, y);
 
-    //This if statement is only runned immediately after the mouse is
-    //clicked
-    if (!Ani.holdClick){
-      if(Ani.drawn){
-        cancelAnimationFrame(req);
-        Ani.ctx.clearRect(0,0, Ani.canvas.width, Ani.canvas.height);
-      }
-      Ani.canvas.width = document.documentElement.clientWidth;
-      Ani.canvas.height = document.documentElement.clientHeight*0.95;
-      Ani.FT_Sketch.clear();
-      Ani.Input_2D.clear();
-      Ani.holdClick = true;
-      Ani.ctx.beginPath();
-      Ani.ctx.strokeStyle = 'rgba(255, 255, 255, 1)'; //White
-      Ani.ctx.lineWidth = 2.0;
-      Ani.ctx.moveTo(x, y);
-      //console.log(x, y);
-      Ani.prevPoint.x = x;
-      Ani.prevPoint.y = y;
-      Ani.Input_2D.push(x, y);
-      Ani.drawn = true;
+  // When nothing is being clicked.
+  } else if (event.buttons === 0) {
+    // The following if statement is only reached immediately after
+    // the mouse is released, which should happen directly after one is done
+    // sketching.
+    if (Ani.holdClick) {
+      plotPointsOnRelease();
+    // This else if is only reached at the very beginning,
+    // which gives instructions for how to use.
+    } else if (!Ani.drawn) {
+      onStart();
     }
-    Ani.ctx.bezierCurveTo(Ani.prevPoint.x, Ani.prevPoint.y, x, y, x, y);
-    Ani.ctx.stroke();
+  }
+}
+
+
+function touchPlotPointsOnMove(event) {
+  var touches = event.changedTouches;
+  for (var i = 0; i < touches.length; i++) {
+    x = touches[i].pageX - Ani.canvas.offsetLeft;
+    y = touches[i].pageY - Ani.canvas.offsetTop;
+    plotPointsOnMove(x, y);
+  }
+}
+
+
+function plotPointsOnMove(x, y) {
+  // The code within this
+  // if statement is only reached immediately after the mouse is
+  // clicked
+  if (!Ani.holdClick){
+    if(Ani.drawn){
+      cancelAnimationFrame(req);
+      Ani.ctx.clearRect(0,0, Ani.canvas.width, Ani.canvas.height);
+    }
+    Ani.canvas.width = document.documentElement.clientWidth;
+    Ani.canvas.height = document.documentElement.clientHeight*0.95;
+    Ani.FT_Sketch.clear();
+    Ani.Input_2D.clear();
+    Ani.holdClick = true;
+    Ani.ctx.beginPath();
+    Ani.ctx.strokeStyle = 'rgba(255, 255, 255, 1)'; //White
+    Ani.ctx.lineWidth = 2.0;
     Ani.ctx.moveTo(x, y);
+    //console.log(x, y);
     Ani.prevPoint.x = x;
     Ani.prevPoint.y = y;
     Ani.Input_2D.push(x, y);
+    Ani.drawn = true;
   }
+  Ani.ctx.bezierCurveTo(Ani.prevPoint.x, Ani.prevPoint.y, x, y, x, y);
+  Ani.ctx.stroke();
+  Ani.ctx.moveTo(x, y);
+  Ani.prevPoint.x = x;
+  Ani.prevPoint.y = y;
+  Ani.Input_2D.push(x, y);
+}
 
-  //This portion of code is runned when nothing is being clicked.
-  else if (event.buttons === 0){
 
-    //The following if statement is only runned immediately after
-    //the mouse is released, which should happpen directly after one is done
-    //sketching.
-    if (Ani.holdClick){
-      Ani.holdClick = false;
-      Ani.ctx.closePath();
-      Ani.TotalPoints = Ani.Input_2D.length;
-
-      /*This block atttempts to alleviate the Gibbs effect.*/
-      let tmpx = Ani.Input_2D.real[0] - Ani.Input_2D.real[Ani.TotalPoints - 1];
-      let tmpy = Ani.Input_2D.imag[0] - Ani.Input_2D.imag[Ani.TotalPoints - 1];
-      let tmpdist = euclideanDistance(tmpx, tmpy);
-      let tmpN = Math.round(tmpdist*10/500);
-      for (let i = 1; i < tmpN; i++){
-        Ani.Input_2D.push(
-          Ani.Input_2D.real[Ani.TotalPoints - i] + i*tmpx/tmpN,
-           Ani.Input_2D.imag[Ani.TotalPoints - i] + i*tmpy/tmpN
-         )
-         Ani.TotalPoints += 1;
-      }
-
-      if (Ani.TotalPoints%2 === 0){
-        Ani.showNPosFreq = (Ani.TotalPoints - 1)/2;
-        Ani.showNNegFreq = Ani.TotalPoints/2 + 1;
-      }else{
-        Ani.showNPosFreq = (Ani.TotalPoints - 1)/2;
-        Ani.showNNegFreq = (Ani.TotalPoints - 1)/2;
-      }
-
-      Ani.f = fftfreq(Ani.TotalPoints);
-      Ani.FT_Output = fourierTransform(Ani.Input_2D);
-      Ani.j = 0;
-
-      for (let i = 1; i < tmpN; i++){
-        Ani.Input_2D.pop();
-      }
-
-      //Only request drawing if something is already sketched out
-      if (Ani.drawn){
-        requestAnimationFrame(Ani.animate);
-      }
-    }
-
-    //This else if is only runned at the very beggining,
-    //which gives instructions for how to use.
-    else if (!Ani.drawn){
-      Ani.canvas.width = document.documentElement.clientWidth;
-      Ani.canvas.height = document.documentElement.clientHeight*0.95;
-      Ani.ctx.font = "80px Arial";
-      Ani.ctx.fillStyle = "White";
-      Ani.ctx.fillText("Sketch here", 3*Ani.canvas.width/8,
-                                   3*Ani.canvas.height/8);
-    }
+function plotPointsOnRelease() {
+  Ani.holdClick = false;
+  Ani.ctx.closePath();
+  Ani.TotalPoints = Ani.Input_2D.length;
+  // Alleviate the Gibbs effect
+  let tmpx = Ani.Input_2D.real[0] - Ani.Input_2D.real[Ani.TotalPoints - 1];
+  let tmpy = Ani.Input_2D.imag[0] - Ani.Input_2D.imag[Ani.TotalPoints - 1];
+  let tmpdist = euclideanDistance(tmpx, tmpy);
+  let tmpN = Math.round(tmpdist*10/500);
+  for (let i = 1; i < tmpN; i++){
+    Ani.Input_2D.push(
+      Ani.Input_2D.real[Ani.TotalPoints - i] + i*tmpx/tmpN,
+        Ani.Input_2D.imag[Ani.TotalPoints - i] + i*tmpy/tmpN
+      )
+      Ani.TotalPoints += 1;
   }
+  if (Ani.TotalPoints%2 === 0){
+    Ani.showNPosFreq = (Ani.TotalPoints - 1)/2;
+    Ani.showNNegFreq = Ani.TotalPoints/2 + 1;
+  }else{
+    Ani.showNPosFreq = (Ani.TotalPoints - 1)/2;
+    Ani.showNNegFreq = (Ani.TotalPoints - 1)/2;
+  }
+  Ani.f = fftfreq(Ani.TotalPoints);
+  Ani.FT_Output = fourierTransform(Ani.Input_2D);
+  Ani.j = 0;
+  for (let i = 1; i < tmpN; i++){
+    Ani.Input_2D.pop();
+  }
+  //Only request drawing if something is already sketched out
+  if (Ani.drawn){
+    requestAnimationFrame(Ani.animate);
+  }
+}
+
+
+function onStart() {
+  Ani.canvas.width = document.documentElement.clientWidth;
+  Ani.canvas.height = document.documentElement.clientHeight*0.95;
+  Ani.ctx.font = "80px Arial";
+  Ani.ctx.fillStyle = "White";
+  Ani.ctx.fillText("Sketch here", 3*Ani.canvas.width/8,
+                                3*Ani.canvas.height/8);
 }
