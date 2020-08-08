@@ -2,7 +2,8 @@
 App for the circles drawing.
 """
 import sys
-from qt_widgets import QtWidgets, QtCore, QtGui, HorizontalSliderBox
+from qt_widgets import QtWidgets, QtCore, QtGui
+from qt_widgets import HorizontalSliderBox, DoubleHorizontalEntryBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from circles_animator import CirclesAnimator
 from typing import Tuple, Union
@@ -31,7 +32,8 @@ class Canvas(FigureCanvasQTAgg):
         self._parent = parent
         self._ani = CirclesAnimator(dpi, interval)
         FigureCanvasQTAgg.__init__(self, self._ani.figure)
-        self.setMinimumHeight(400)
+        # self.setMinimumWidth(500)
+        self.setMinimumHeight(500)
         self._mouse_usage = 0
         self._prev_mouse_position = []
 
@@ -212,15 +214,21 @@ class App(QtWidgets.QMainWindow):
         self.widgets_layout = QtWidgets.QVBoxLayout(self.window)
         self.layout.addLayout(self.widgets_layout)
         self.widgets_layout.addWidget(self.mouse_dropdown)
+        self.xy_entry = DoubleHorizontalEntryBox("Set x(t)", "Set y(t)")
+        self.xy_entry.set_observers([self.canvas.get_animation(), self])
+        self.sliders = []
+        self.widgets_layout.addWidget(self.xy_entry)
         self.widgets_layout.addWidget(self.speed_slider)
         self.speed_slider.set_number_of_ticks(201)
         self.speed_slider.set_range(-100, 100)
         self.speed_slider.set_slider(20.0)
         self.speed_slider.set_observers([self])
+        self.speed_slider.set_value_string_format("%d")
         self.widgets_layout.addWidget(self.resolution_slider)
         self.resolution_slider.set_number_of_ticks(100)
         self.resolution_slider.set_range(1, 100)
         self.resolution_slider.set_slider(100)
+        self.resolution_slider.set_value_string_format("%d")
         self.resolution_slider.set_observers([self])
 
     def on_mouse_dropdown_changed(self, index: int) -> None:
@@ -231,6 +239,59 @@ class App(QtWidgets.QMainWindow):
          index: index of the mouse change.
         """
         self.canvas.set_mouse_usage(index)
+
+    def on_entry_returned(self, entry_info) -> None:
+        """
+        On entry returned
+
+        Parameters:
+         entry_info: the dictionary containing info about
+         the entry.
+        """
+        ani = self.canvas.get_animation()
+        n = ani.get_number_of_points()
+        self.resolution_slider.set_range(1, n-1)
+        self.resolution_slider.set_number_of_ticks(n-1)
+        self.resolution_slider.set_slider(n-1)
+        ft = ani.get_functions()
+        def_val = ft.get_enumerated_default_values()
+        self.destroy_sliders()
+        self.place_variable_sliders(def_val)
+
+
+    def place_variable_sliders(self, d):
+        """
+        Place the variable sliders.
+
+        Parameters:
+         d: the dictionary of the variables and their values.
+        """
+        for i in range(len(d)):
+            symbol = d[i][0]
+            value = d[i][1]
+            slider_box = HorizontalSliderBox(self, symbol)
+            slider_box.set_range(-10.0, 10.0)
+            slider_box.set_number_of_ticks(2001)
+            slider_box.set_observers([self])
+            slider_box.set_slider(value)
+            self.widgets_layout.addWidget(slider_box)
+            self.sliders.append(slider_box)
+        self.widgets_layout.addWidget(self.speed_slider)
+        self.widgets_layout.addWidget(self.resolution_slider)
+
+    def destroy_sliders(self) -> None:
+        """
+        Destroy the sliders of the entry inputs.
+        """
+        while self.sliders:
+            slider_box = self.sliders.pop()
+            self.widgets_layout.removeWidget(slider_box)
+            self.layout.removeWidget(slider_box)
+            slider_box.destroy_slider()
+            slider_box.close()
+        self.widgets_layout.removeWidget(self.speed_slider)
+        self.widgets_layout.removeWidget(self.resolution_slider)
+
 
     def on_slider_changed(self, slider_dict) -> None:
         """
@@ -246,6 +307,13 @@ class App(QtWidgets.QMainWindow):
         elif slider_dict['id'] == "Number of circles ":
             resolution = slider_dict['value']
             self.canvas.get_animation().set_circle_resolution(int(resolution)+1)
+        elif self.sliders != []:
+            params = []
+            for slider in self.sliders:
+                info = slider.get_slider_info()
+                params.append(info['value'])
+            ani = self.canvas.get_animation()
+            ani.set_params(*params)
 
 
 if __name__ == "__main__":

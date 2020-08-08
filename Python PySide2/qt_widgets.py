@@ -120,6 +120,7 @@ class HorizontalSliderBox(QtWidgets.QGroupBox):
         self.setMinimumWidth(250)
         self.setMaximumWidth(300)
         self.setMaximumHeight(100)
+        self._string_format = "%s = %.2f"
         self._layout = QtWidgets.QVBoxLayout()
         self._label = QtWidgets.QLabel("Set " + str(slider_id))
         self._slider = Slider(slider_id,
@@ -168,6 +169,16 @@ class HorizontalSliderBox(QtWidgets.QGroupBox):
         slider_observers.append(self)
         self._slider.set_observers(slider_observers)
 
+    def set_value_string_format(self, string_format: str) -> None:
+        """
+        Set the value string format.
+
+        Parameters:
+         string format: the string format to display the value
+         of the slider.
+        """
+        self._string_format = "%s = " + string_format
+
     def on_slider_changed(self, slider_input: dict) -> None:
         """
         Respond to changes in the slider.
@@ -177,7 +188,7 @@ class HorizontalSliderBox(QtWidgets.QGroupBox):
         """
         val = slider_input['value']
         slider_id = slider_input['id']
-        self._label.setText("%s = %d" % (slider_id, int(val)))
+        self._label.setText(self._string_format % (slider_id, val))
 
     def destroy_slider(self) -> None:
         """
@@ -200,7 +211,7 @@ class HorizontalSliderBox(QtWidgets.QGroupBox):
 
 class HorizontalEntryBox(QtWidgets.QGroupBox):
     """
-    GUI Box that contains an label and text input widget.
+    GUI Box that contains a label and text input widget.
     """
 
     def __init__(self, label_name: str) -> None:
@@ -242,3 +253,58 @@ class HorizontalEntryBox(QtWidgets.QGroupBox):
         for observer in self._observers:
             observer.on_entry_returned(
                 self._input.text())
+
+
+class DoubleHorizontalEntryBox(QtWidgets.QGroupBox):
+    """
+    GUI Box that contains a label with two text input widget.
+    """
+
+    def __init__(self, label_name1: str, label_name2: str) -> None:
+        """
+        Constructor.
+
+        Parameters:
+         label_name: the label for the entry widget.
+        """
+        QtWidgets.QGroupBox.__init__(self)
+        self.setMinimumWidth(250)
+        self.setMaximumWidth(300)
+        self.setMaximumHeight(200)
+        self._observers = []
+        self._label1 = QtWidgets.QLabel(label_name1)
+        self._label2 = QtWidgets.QLabel(label_name2)
+        self._layout = QtWidgets.QVBoxLayout()
+        self._input1 = QtWidgets.QLineEdit()
+        self._input1.returnPressed.connect(self.notify_change)
+        self._input2 = QtWidgets.QLineEdit()
+        self._input2.returnPressed.connect(self.notify_change)
+        self._button = QtWidgets.QPushButton("OK")
+        self._button.clicked.connect(self.notify_change)
+        self._layout.addWidget(self._label1)
+        self._layout.addWidget(self._input1)
+        self._layout.addWidget(self._label2)
+        self._layout.addWidget(self._input2)
+        self._layout.addWidget(self._button)
+        self.setLayout(self._layout)
+
+    def set_observers(self, observers: list) -> None:
+        """
+        Set the observers for the line edit widget.
+
+        Parameters:
+         observers: The observers of the widget.
+        """
+        self._observers = observers
+
+    def notify_change(self) -> None:
+        """
+        Notify to the observers that the line edit has changed
+        """
+        for observer in self._observers:
+            observer.on_entry_returned(
+                {
+                    "1": self._input1.text(),
+                    "2": self._input2.text()
+                }
+            )

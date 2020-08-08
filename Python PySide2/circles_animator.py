@@ -4,6 +4,7 @@ Circles animator.
 import numpy as np
 from animator import Animator
 from typing import Union, List
+from functions import FunctionRtoR
 
 
 class CirclesAnimator(Animator):
@@ -46,6 +47,7 @@ class CirclesAnimator(Animator):
         self._line_drawn_by_circle_plot = line_drawn_by_circle_plot
         self._time_elapsed = 0
         self._STATE = 0
+        self._ft = None
 
     def append(self, point: list) -> None:
         """
@@ -54,6 +56,46 @@ class CirclesAnimator(Animator):
         """
         point = point[0] + 1.0j*point[1]
         self._points.append(point)
+
+    def on_entry_returned(self, entry_info) -> None:
+        n = len(self._points) 
+        if n < 64:
+            n = 64
+        x_func_name = entry_info['1']
+        y_func_name = entry_info['2']
+        function_name = "%s + 1.0j*(%s)" % (x_func_name, y_func_name) \
+                        if y_func_name != "" else "%s" % x_func_name
+        if function_name == "":
+            function_name = "zero(t)"
+        f = FunctionRtoR(function_name)
+        self._ft = f
+        t = np.linspace(-np.pi, np.pi, n)
+        self._points = list(f(t))
+        self._line_plot.set_xdata(np.real(np.array(self._points)))
+        self._line_plot.set_ydata(np.imag(np.array(self._points)))
+        self.update(0.01)
+        self.clear()
+        self._points = list(f(t))
+        self.start_draw_circes()
+
+    def set_params(self, *params):
+        n = len(self._points) 
+        if n < 64:
+            n = 64
+        z = self._ft(np.linspace(np.pi, -np.pi, len(self._points)), *params)
+        self._points = list(z) # TODO: this line may not be necessary.
+        self._line_plot.set_xdata(np.real(np.array(self._points)))
+        self._line_plot.set_ydata(np.imag(np.array(self._points)))
+        self.update(0.01)
+        self.clear()
+        self._points = list(z)
+        self.start_draw_circes()
+
+    def get_functions(self):
+        """
+        Getter for x(t) and y(t).
+        """
+        return self._ft
 
     def set_animation_speed(self, 
                             animation_speed: Union[float, int]) -> None:
